@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Mi Local | MER360
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/admin_local.css') }}"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+
+        <a href="/inicio">
+
+            MER360
+
+        </a>
+
+    </div>
+
+    <div class="acciones">
+
+        <a href="/inicio">
+
+            Inicio
+
+        </a>
+
+        <a href="/logout">
+
+            Cerrar Sesión
+
+        </a>
+
+    </div>
+
+</header>
+
+<section class="panel">
+
+    <div class="encabezado">
+
+        <div>
+
+            <h1>
+
+                {{ local.nombre }}
+
+            </h1>
+
+            <p>
+
+                Panel de Administración del Local
+
+            </p>
+
+        </div>
+
+        <button
+            id="abrirProducto"
+            class="btn-agregar"
+        >
+
+            + Agregar Producto
+
+        </button>
+
+    </div>
+
+</section>
+
+<section class="productos">
+
+    <h2>
+
+        Mis Productos
+
+    </h2>
+
+    <div class="grid-productos">
+
+        {% for producto in productos %}
+
+        <div class="card">
+
+            <img
+                src="{{ producto.imagenes }}"
+                alt="{{ producto.nombre }}"
+            >
+
+            <div class="contenido">
+
+                <h3>
+
+                    {{ producto.nombre }}
+
+                </h3>
+
+                <p>
+
+                    ${{ producto.precio }}
+
+                </p>
+
+                <div class="acciones-card">
+
+                    <button
+                        class="btn-editar"
+                        onclick="abrirEditar(
+                        '{{ producto.id_p }}',
+                        '{{ producto.nombre }}',
+                        '{{ producto.precio }}',
+                        '{{ producto.imagenes }}',
+                        `{{ producto.descripcion }}`)"
+                    >
+
+                        Editar
+
+                    </button>
+
+                    <button
+                        class="btn-eliminar"
+                        onclick="abrirEliminar(
+                            '{{ producto.id_p }}',
+                            '{{ producto.nombre }}'
+                        )"
+                    >
+
+                        Eliminar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+<div
+    class="overlay"
+    id="overlay"
+></div>
+
+<div
+    class="modal-producto"
+    id="modalProducto"
+>
+
+    <div class="producto-card">
+
+        <button
+            class="cerrar"
+            id="cerrarProducto"
+            type="button"
+        >
+
+            ✕
+
+        </button>
+
+        <h2>
+
+            Nuevo Producto
+
+        </h2>
+
+        <form
+            action="/agregar_producto"
+            method="POST"
+        >
+
+            <input
+                type="text"
+                name="nombre"
+                placeholder="Nombre del producto"
+                required
+            >
+
+            <input
+                type="number"
+                step="0.01"
+                name="precio"
+                placeholder="Precio"
+                required
+            >
+
+            <input
+                type="text"
+                name="imagenes"
+                placeholder="URL de imagen"
+            >
+
+            <textarea
+                name="descripcion"
+                placeholder="Descripción"
+                rows="5"
+            ></textarea>
+
+            <button
+                type="submit"
+                class="btn-guardar"
+            >
+
+                Guardar Producto
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div
+    class="modal-producto"
+    id="modalEditar"
+>
+
+    <div class="producto-card">
+
+        <button
+            class="cerrar"
+            id="cerrarEditar"
+            type="button"
+        >
+
+            ✕
+
+        </button>
+
+        <h2>
+
+            Editar Producto
+
+        </h2>
+
+        <form
+            id="formEditar"
+            method="POST"
+        >
+
+            <input
+                type="text"
+                name="nombre"
+                id="editarNombre"
+                placeholder="Nombre del producto"
+                required
+            >
+
+            <input
+                type="number"
+                step="0.01"
+                name="precio"
+                id="editarPrecio"
+                placeholder="Precio"
+                required
+            >
+
+            <input
+                type="text"
+                name="imagenes"
+                id="editarImagen"
+                placeholder="URL de imagen"
+            >
+
+            <textarea
+                name="descripcion"
+                id="editarDescripcion"
+                placeholder="Descripción"
+                rows="5"
+            ></textarea>
+
+            <button
+                type="submit"
+                class="btn-guardar"
+            >
+
+                Guardar Cambios
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div
+    class="modal-producto"
+    id="modalEliminar"
+>
+
+     <div class="producto-card">
+
+        <button
+            class="cerrar"
+            id="cerrarEliminar"
+            type="button"
+        >
+            ✕
+
+        </button>
+
+            <h2>
+
+                Eliminar Producto
+
+            </h2>
+
+            <p
+                id="textoEliminar"
+                style="
+                    text-align:center;
+                    margin:20px 0;
+                "
+            ></p>
+
+            <form
+                id="formEliminar"
+                method="POST"
+            >
+
+                <button
+                    class="btn-eliminar"
+                    type="submit"
+                    style="
+                        width:100%;
+                        border:none;
+                        padding:14px;
+                        cursor:pointer;
+                        border-radius:12px;
+                        font-size:15px;
+                        font-weight:600;
+                    "
+                >
+
+                    Eliminar Producto
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const modalEliminar =
+document.getElementById("modalEliminar");
+
+const cerrarEliminar =
+document.getElementById("cerrarEliminar");
+
+const textoEliminar =
+document.getElementById("textoEliminar");
+
+const formEliminar =
+document.getElementById("formEliminar");
+
+const modalEditar =
+document.getElementById("modalEditar");
+
+const cerrarEditar =
+document.getElementById("cerrarEditar");
+
+const formEditar =
+document.getElementById("formEditar");
+
+const editarNombre =
+document.getElementById("editarNombre");
+
+const editarPrecio =
+document.getElementById("editarPrecio");
+
+const editarImagen =
+document.getElementById("editarImagen");
+
+const editarDescripcion =
+document.getElementById("editarDescripcion");
+
+const abrirProducto =
+document.getElementById("abrirProducto");
+
+const cerrarProducto =
+document.getElementById("cerrarProducto");
+
+const modalProducto =
+document.getElementById("modalProducto");
+
+const overlay =
+document.getElementById("overlay");
+
+abrirProducto.addEventListener(
+    "click",
+    () => {
+
+        modalProducto.classList.add("activo");
+        overlay.classList.add("activo");
+
+    }
+);
+
+cerrarProducto.addEventListener(
+    "click",
+    () => {
+
+        modalProducto.classList.remove("activo");
+        overlay.classList.remove("activo");
+
+    }
+);
+
+overlay.addEventListener(
+    "click",
+    () => {
+
+        modalProducto.classList.remove("activo");
+
+        modalEditar.classList.remove("activo");
+
+        modalEliminar.classList.remove("activo");
+
+        overlay.classList.remove("activo");
+
+    }
+);
+
+function abrirEditar(
+    id,
+    nombre,
+    precio,
+    imagen,
+    descripcion
+){
+
+    editarNombre.value = nombre;
+
+    editarPrecio.value = precio;
+
+    editarImagen.value = imagen;
+
+    editarDescripcion.value = descripcion;
+
+    formEditar.action =
+    "/editar_producto/" + id;
+
+    modalEditar.classList.add("activo");
+
+    overlay.classList.add("activo");
+
+}
+
+
+cerrarEditar.addEventListener(
+    "click",
+    () => {
+
+        modalEditar.classList.remove("activo");
+
+        overlay.classList.remove("activo");
+
+    }
+);
+
+
+function abrirEliminar(
+    id,
+    nombre
+){
+
+    textoEliminar.innerHTML =
+    "¿Deseas eliminar el producto <br><br><b>" +
+    nombre +
+    "</b>?";
+
+    formEliminar.action =
+    "/eliminar_producto/" + id;
+
+    modalEliminar.classList.add("activo");
+
+    overlay.classList.add("activo");
+
+}
+
+cerrarEliminar.addEventListener(
+    "click",
+    () => {
+
+        modalEliminar.classList.remove("activo");
+
+        overlay.classList.remove("activo");
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>
